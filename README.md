@@ -3,17 +3,23 @@
 ## Prerequisites
 
 * **Java Development Kit (JDK) 17+**
+* **Python 3.8+** (Stack only)
 
 ## Execution Instructions
 
-Each implementation is written in Java. Compile and run them from the root directory using the following commands:
+Each implementation lives in its own directory. Most are written in Java; the Stack is in Python.
 
-### Example: B-Tree
+### Java (compile & run from root)
+
+#### Example: Graph
+```bash
+
+javac Graph/Graph.java
+java -cp Graph Graph
+```
+
+### Python (Stack)
 
 ```bash
-# Compile
-javac BTree/BTree.java
-
-# Run
-java BTree/BTree
+python3 Stack/stack.py
 ```

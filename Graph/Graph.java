@@ -1,98 +1,87 @@
 import java.util.*;
 
-class Graph {
-    private int V;
-    private LinkedList<Integer>[] adj;
+public class Graph<T> {
+  private final Map<T, Set<T>> adjacencyList;
 
-    // Constructor
-    Graph(int v) {
-        V = v;
-        adj = new LinkedList[V];
-        for (int i = 0; i < V; i++) {
-            adj[i] = new LinkedList<>();
+  public Graph() {
+    this.adjacencyList = new HashMap<>();
+  }
+
+  public void addVertex(T vertex) {
+    adjacencyList.putIfAbsent(vertex, new LinkedHashSet<>());
+  }
+
+  public void addEdge(T source, T destination) {
+    addVertex(source);
+    addVertex(destination);
+    adjacencyList.get(source).add(destination);
+    adjacencyList.get(destination).add(source); // Undirected
+  }
+
+  public void bfs(T startNode) {
+    if (!adjacencyList.containsKey(startNode))
+      return;
+
+    Set<T> visited = new HashSet<>();
+    Queue<T> queue = new LinkedList<>();
+
+    visited.add(startNode);
+    queue.add(startNode);
+
+    while (!queue.isEmpty()) {
+      T current = queue.poll();
+      System.out.print(current + " ");
+
+      for (T neighbor : adjacencyList.getOrDefault(current, Collections.emptySet())) {
+        if (visited.add(neighbor)) { // .add returns false if already present
+          queue.add(neighbor);
         }
+      }
+    }
+    System.out.println();
+  }
+
+  public int[][] toAdjacencyMatrix(List<T> nodes) {
+    int size = nodes.size();
+    int[][] matrix = new int[size][size];
+    Map<T, Integer> nodeToIndex = new HashMap<>();
+
+    for (int i = 0; i < size; i++) {
+      nodeToIndex.put(nodes.get(i), i);
     }
 
-    // Add edge (undirected)
-    void addEdge(int u, int v) {
-        adj[u].add(v);
-        adj[v].add(u);
-    }
-
-    // BFS traversal
-    void BFS(int start) {
-        boolean[] visited = new boolean[V];
-        Queue<Integer> queue = new LinkedList<>();
-
-        visited[start] = true;
-        queue.add(start);
-
-        while (!queue.isEmpty()) {
-            int node = queue.poll();
-            System.out.print(node + " ");
-
-            for (int neighbor : adj[node]) {
-                if (!visited[neighbor]) {
-                    visited[neighbor] = true;
-                    queue.add(neighbor);
-                }
-            }
+    for (int i = 0; i < size; i++) {
+      T u = nodes.get(i);
+      for (T v : adjacencyList.getOrDefault(u, Collections.emptySet())) {
+        if (nodeToIndex.containsKey(v)) {
+          matrix[i][nodeToIndex.get(v)] = 1;
         }
+      }
     }
+    return matrix;
+  }
 
-    // Generate adjacency matrix
-    int[][] getAdjacencyMatrix() {
-        int[][] matrix = new int[V][V];
+  public static void main(String[] args) {
+    Graph<Integer> g = new Graph<>();
 
-        for (int i = 0; i < V; i++) {
-            for (int j : adj[i]) {
-                matrix[i][j] = 1;
-            }
-        }
+    List.of(
+        List.of(9, 1), List.of(1, 5), List.of(5, 4), List.of(4, 8),
+        List.of(8, 10), List.of(2, 10), List.of(7, 2), List.of(3, 7),
+        List.of(3, 9), List.of(9, 6), List.of(1, 6), List.of(6, 5),
+        List.of(3, 6), List.of(3, 4), List.of(6, 7), List.of(6, 2),
+        List.of(6, 10), List.of(4, 10), List.of(2, 8)).forEach(edge -> g.addEdge(edge.get(0), edge.get(1)));
 
-        return matrix;
+    System.out.print("BFS from 9: ");
+    g.bfs(9);
+
+    // Sort keys for a deterministic matrix output
+    List<Integer> allNodes = new ArrayList<>(g.adjacencyList.keySet());
+    Collections.sort(allNodes);
+
+    System.out.println("\nAdjacency Matrix:");
+    int[][] matrix = g.toAdjacencyMatrix(allNodes);
+    for (int[] row : matrix) {
+      System.out.println(Arrays.toString(row));
     }
-
-    // Print matrix
-    void printMatrix(int[][] matrix) {
-        for (int i = 0; i < V; i++) {
-            for (int j = 0; j < V; j++) {
-                System.out.print(matrix[i][j] + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    // Main method
-    public static void main(String[] args) {
-        Graph g = new Graph(19);
-
-        g.addEdge(9, 1);
-        g.addEdge(1, 5);
-        g.addEdge(5, 4);
-        g.addEdge(4, 8);
-        g.addEdge(8, 10);
-        g.addEdge(2, 10);
-        g.addEdge(7, 2);
-        g.addEdge(3, 7);
-        g.addEdge(3, 9);
-        g.addEdge(9, 6);
-        g.addEdge(1, 6);
-        g.addEdge(6, 5);
-        g.addEdge(3, 6);
-        g.addEdge(3, 4);
-        g.addEdge(6, 7);
-        g.addEdge(6, 2);
-        g.addEdge(6, 10);
-        g.addEdge(4, 10);
-        g.addEdge(2, 8);
-        
-
-        System.out.println("BFS Traversal starting from node 9:");
-        g.BFS(9);
-
-        System.out.println("\n\nAdjacency Matrix:");
-        int[][] matrix = g.getAdjacencyMatrix();
-        g.printMatrix(matrix);
-    }
+  }
 }
